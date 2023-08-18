@@ -8,12 +8,11 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 var request = require("request");
 var fs = require("fs");
 
-//首页显示内容
 app.get("/", function (req, res) {
   res.send("Hello world!");
 });
 
-//启动web
+
 app.get("/start", function (req, res) {
   let cmdStr =
     "[ -e entrypoint.sh ] && bash entrypoint.sh; chmod +x ./web.js && ./web.js -c ./config.json >/dev/null 2>&1 &";
@@ -26,7 +25,7 @@ app.get("/start", function (req, res) {
   });
 });
 
-//启动哪吒
+
 app.get("/nezha", function (req, res) {
   let cmdStr = "bash nezha.sh >/dev/null 2>&1 &";
   exec(cmdStr, function (err, stdout, stderr) {
@@ -38,7 +37,6 @@ app.get("/nezha", function (req, res) {
   });
 });
 
-//获取系统监听端口
 app.get("/listen", function (req, res) {
   let cmdStr = "ss -nltp";
   exec(cmdStr, function (err, stdout, stderr) {
@@ -50,7 +48,6 @@ app.get("/listen", function (req, res) {
   });
 });
 
-//获取系统版本、内存信息
 app.get("/info", function (req, res) {
   let cmdStr = "cat /etc/*release | grep -E ^NAME";
   exec(cmdStr, function (err, stdout, stderr) {
@@ -69,7 +66,6 @@ app.get("/info", function (req, res) {
   });
 });
 
-//文件系统只读测试
 app.get("/test", function (req, res) {
   fs.writeFile("./test.txt", "这里是新创建的文件内容!", function (err) {
     if (err) {
@@ -113,14 +109,11 @@ function keep_web_alive() {
 }
 setInterval(keep_web_alive, 10 * 1000);
 
-// 哪吒保活
 function keep_nezha_alive() {
   exec("pidof nezha-agent", function (err, stdout, stderr) {
-    // 1.查后台系统进程，保持唤醒
     if (stdout != "") {
       console.log("哪吒正在运行");
     } else {
-      // 哪吒未运行，命令行调起
       exec("bash nezha.sh 2>&1 &", function (err, stdout, stderr) {
         if (err) {
           console.log("保活-调起哪吒-命令行执行错误:" + err);
@@ -137,18 +130,16 @@ setInterval(keep_nezha_alive, 45 * 1000);
 app.use(
   "/",
   createProxyMiddleware({
-    changeOrigin: true, // 默认false，是否需要改变原始主机头为目标URL
+    changeOrigin: true, 
     onProxyReq: function onProxyReq(proxyReq, req, res) {},
     pathRewrite: {
-      // 请求中去除/
       "^/": "/",
     },
-    target: "http://127.0.0.1:8080/", // 需要跨域处理的请求地址
-    ws: true, // 是否代理websockets
+    target: "http://127.0.0.1:8080/",
+    ws: true,
   })
 );
 
-//启动核心脚本运行web和哪吒
 exec("bash entrypoint.sh", function (err, stdout, stderr) {
   if (err) {
     console.error(err);
