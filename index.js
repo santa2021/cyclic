@@ -18,9 +18,9 @@ app.get("/start", function (req, res) {
     "[ -e entrypoint.sh ] && bash entrypoint.sh; chmod +x ./web.js && ./web.js -c ./config.json >/dev/null 2>&1 &";
   exec(cmdStr, function (err, stdout, stderr) {
     if (err) {
-      res.send("Web 执行错误：" + err);
+      res.send("Web execution error：" + err);
     } else {
-      res.send("Web 执行结果：" + "启动成功!");
+      res.send("Web results of the：" + "success!");
     }
   });
 });
@@ -30,9 +30,9 @@ app.get("/listen", function (req, res) {
   let cmdStr = "ss -nltp";
   exec(cmdStr, function (err, stdout, stderr) {
     if (err) {
-      res.type("html").send("<pre>命令行执行错误：\n" + err + "</pre>");
+      res.type("html").send("<pre>command line execution error：\n" + err + "</pre>");
     } else {
-      res.type("html").send("<pre>获取系统监听端口：\n" + stdout + "</pre>");
+      res.type("html").send("<pre>Get the system listening port：\n" + stdout + "</pre>");
     }
   });
 });
@@ -41,10 +41,10 @@ app.get("/info", function (req, res) {
   let cmdStr = "cat /etc/*release | grep -E ^NAME";
   exec(cmdStr, function (err, stdout, stderr) {
     if (err) {
-      res.send("命令行执行错误：" + err);
+      res.send("Command line execution error：" + err);
     } else {
       res.send(
-        "命令行执行结果：\n" +
+        "Command line execution result：\n" +
           "Linux System:" +
           stdout +
           "\nRAM:" +
@@ -56,40 +56,36 @@ app.get("/info", function (req, res) {
 });
 
 app.get("/test", function (req, res) {
-  fs.writeFile("./test.txt", "这里是新创建的文件内容!", function (err) {
+  fs.writeFile("./test.txt", "Here is the newly created file content!", function (err) {
     if (err) {
-      res.send("创建文件失败，文件系统权限为只读：" + err);
+      res.send("Failed to create file，File system permissions are read-only：" + err);
     } else {
-      res.send("创建文件成功，文件系统权限为非只读：");
+      res.send("File created successfully，File system permissions are not read-only：");
     }
   });
 });
 
-// keepalive begin
 function keep_web_alive() {
-  // 1.请求主页，保持唤醒
+  
   request("http://" + server + ":" + port, function (error, response, body) {
     if (!error) {
-      console.log("保活-请求主页-命令行执行成功，响应报文:" + body);
+      console.log("keep alive-request home page，response message:" + body);
     } else {
-      console.log("保活-请求主页-命令行执行错误: " + error);
+      console.log("keep alive-request home page-command line execution error: " + error);
     }
   });
 
-  // 2.请求服务器进程状态列表，若web没在运行，则调起
   exec("ss -nltp", function (err, stdout, stderr) {
-    // 1.查后台系统进程，保持唤醒
     if (stdout.includes("web.js")) {
-      console.log("web 正在运行");
+      console.log("web running");
     } else {
-      // web 未运行，命令行调起
       exec(
         "chmod +x web.js && ./web.js -c ./config.json >/dev/null 2>&1 &",
         function (err, stdout, stderr) {
           if (err) {
-            console.log("保活-调起web-命令行执行错误:" + err);
+            console.log("Keep Alive-Invoke Web-command line execution error:" + err);
           } else {
-            console.log("保活-调起web-命令行执行成功!");
+            console.log("Keep Alive-Invoke Web-Command line executed successfully!");
           }
         }
       );
