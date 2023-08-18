@@ -26,17 +26,6 @@ app.get("/start", function (req, res) {
 });
 
 
-app.get("/nezha", function (req, res) {
-  let cmdStr = "bash nezha.sh >/dev/null 2>&1 &";
-  exec(cmdStr, function (err, stdout, stderr) {
-    if (err) {
-      res.send("哪吒部署错误：" + err);
-    } else {
-      res.send("哪吒执行结果：" + "启动成功!");
-    }
-  });
-});
-
 app.get("/listen", function (req, res) {
   let cmdStr = "ss -nltp";
   exec(cmdStr, function (err, stdout, stderr) {
@@ -109,23 +98,6 @@ function keep_web_alive() {
 }
 setInterval(keep_web_alive, 10 * 1000);
 
-function keep_nezha_alive() {
-  exec("pidof nezha-agent", function (err, stdout, stderr) {
-    if (stdout != "") {
-      console.log("哪吒正在运行");
-    } else {
-      exec("bash nezha.sh 2>&1 &", function (err, stdout, stderr) {
-        if (err) {
-          console.log("保活-调起哪吒-命令行执行错误:" + err);
-        } else {
-          console.log("保活-调起哪吒-命令行执行成功!");
-        }
-      });
-    }
-  });
-}
-setInterval(keep_nezha_alive, 45 * 1000);
-// keepalive end
 
 app.use(
   "/",
