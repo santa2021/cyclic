@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 UUID=${UUID:-'7888f86c-fbb1-4641-85b5-c541688d9706'}
-VMESS_WSPATH=${VMESS_WSPATH:-'/m'}
 VLESS_WSPATH=${VLESS_WSPATH:-'/l'}
-TROJAN_WSPATH=${TROJAN_WSPATH:-'/tr'}
-SS_WSPATH=${SS_WSPATH:-'/ss'}
+
 
 generate_config() {
   cat > config.json << EOF
@@ -33,18 +31,6 @@ generate_config() {
                     {
                         "path":"${VLESS_WSPATH}",
                         "dest":3002
-                    },
-                    {
-                        "path":"${VMESS_WSPATH}",
-                        "dest":3003
-                    },
-                    {
-                        "path":"${TROJAN_WSPATH}",
-                        "dest":3004
-                    },
-                    {
-                        "path":"${SS_WSPATH}",
-                        "dest":3005
                     }
                 ]
             },
@@ -97,90 +83,8 @@ generate_config() {
                 ],
                 "metadataOnly":false
             }
-        },
-        {
-            "port":3003,
-            "listen":"127.0.0.1",
-            "protocol":"vmess",
-            "settings":{
-                "clients":[
-                    {
-                        "id":"${UUID}",
-                        "alterId":0
-                    }
-                ]
-            },
-            "streamSettings":{
-                "network":"ws",
-                "wsSettings":{
-                    "path":"${VMESS_WSPATH}"
-                }
-            },
-            "sniffing":{
-                "enabled":true,
-                "destOverride":[
-                    "http",
-                    "tls"
-                ],
-                "metadataOnly":false
-            }
-        },
-        {
-            "port":3004,
-            "listen":"127.0.0.1",
-            "protocol":"trojan",
-            "settings":{
-                "clients":[
-                    {
-                        "password":"${UUID}"
-                    }
-                ]
-            },
-            "streamSettings":{
-                "network":"ws",
-                "security":"none",
-                "wsSettings":{
-                    "path":"${TROJAN_WSPATH}"
-                }
-            },
-            "sniffing":{
-                "enabled":true,
-                "destOverride":[
-                    "http",
-                    "tls"
-                ],
-                "metadataOnly":false
-            }
-        },
-        {
-            "port":3005,
-            "listen":"127.0.0.1",
-            "protocol":"shadowsocks",
-            "settings":{
-                "clients":[
-                    {
-                        "method":"chacha20-ietf-poly1305",
-                        "password":"${UUID}"
-                    }
-                ],
-                "decryption":"none"
-            },
-            "streamSettings":{
-                "network":"ws",
-                "wsSettings":{
-                    "path":"${SS_WSPATH}"
-                }
-            },
-            "sniffing":{
-                "enabled":true,
-                "destOverride":[
-                    "http",
-                    "tls"
-                ],
-                "metadataOnly":false
-            }
         }
-    ],
+  ],
     "outbounds":[
         {
             "protocol":"freedom"
@@ -218,52 +122,10 @@ generate_config() {
     },
     "dns":{
         "servers":[
-            "https+local://8.8.8.8/dns-query"
+            "https+local://1.1.1.1/dns-query"
         ]
     }
 }
 EOF
 }
 
-generate_nezha() {
-  cat > nezha.sh << EOF
-
-#!/usr/bin/env bash
-
-NEZHA_SERVER=${NEZHA_SERVER}
-NEZHA_PORT=${NEZHA_PORT}
-NEZHA_KEY=${NEZHA_KEY}
-
-check_run() {
-    [[ \$(pidof nezha-agent) ]] && echo "哪吒客户端正在运行中" && exit
-}
-
-check_variable() {
-    [[ -z "\${NEZHA_SERVER}" || -z "\${NEZHA_PORT}" || -z "\${NEZHA_KEY}" ]] && exit
-}
-
-download_agent() {
-    if [ ! -e nezha-agent ]; then
-        URL=\$(wget -qO- -4 "https://api.github.com/repos/naiba/nezha/releases/latest" | grep -o "https.*linux_amd64.zip")
-        wget -t 2 -T 10 -N \${URL}
-        unzip -qod ./ nezha-agent_linux_amd64.zip && rm -f nezha-agent_linux_amd64.zip
-    fi
-}
-
-
-run() {
-    [ -e nezha-agent ] && chmod +x nezha-agent && ./nezha-agent -s \${NEZHA_SERVER}:\${NEZHA_PORT} -p \${NEZHA_KEY}
-}
-
-check_run
-check_variable
-download_agent
-run
-wait
-EOF
-}
-
-generate_config
-generate_nezha
-[ -e nezha.sh ] && bash nezha.sh 2>&1 &
-wait
