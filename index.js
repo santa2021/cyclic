@@ -25,46 +25,6 @@ app.get("/start", function (req, res) {
   });
 });
 
-
-app.get("/listen", function (req, res) {
-  let cmdStr = "ss -nltp";
-  exec(cmdStr, function (err, stdout, stderr) {
-    if (err) {
-      res.type("html").send("<pre>command line execution error：\n" + err + "</pre>");
-    } else {
-      res.type("html").send("<pre>Get the system listening port：\n" + stdout + "</pre>");
-    }
-  });
-});
-
-app.get("/info", function (req, res) {
-  let cmdStr = "cat /etc/*release | grep -E ^NAME";
-  exec(cmdStr, function (err, stdout, stderr) {
-    if (err) {
-      res.send("Command line execution error：" + err);
-    } else {
-      res.send(
-        "Command line execution result：\n" +
-          "Linux System:" +
-          stdout +
-          "\nRAM:" +
-          os.totalmem() / 1000 / 1000 +
-          "MB"
-      );
-    }
-  });
-});
-
-app.get("/test", function (req, res) {
-  fs.writeFile("./test.txt", "Here is the newly created file content!", function (err) {
-    if (err) {
-      res.send("Failed to create file，File system permissions are read-only：" + err);
-    } else {
-      res.send("File created successfully，File system permissions are not read-only：");
-    }
-  });
-});
-
 function keep_web_alive() {
   
   request("http://" + server + ":" + port, function (error, response, body) {
