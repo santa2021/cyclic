@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "Express Hello World",
   "main": "index.js",
-  "repository": "",
-  "author": "Misaka-blog",
   "license": "MIT",
   "private": false,
   "scripts": {
