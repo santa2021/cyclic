@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-UUID=${UUID:-'7888f86c-fbb1-4641-85b5-c541688d9706'}
-VLESS_WSPATH=${VLESS_WSPATH:-'/less'}
+UUID=${UUID:-'4cca5fb6-f062-4819-a46d-fe2f175b1b33'}
+VLESS_WSPATH=${VLESS_WSPATH:-'/vless'}
 
 
 generate_config() {
@@ -98,4 +98,3 @@ generate_config() {
 }
 EOF
 }
-
